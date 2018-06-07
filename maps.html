@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Estilo del mapa -->
+  <style>
+    #googleMap {
+      height: 85%;
+    }
+    html, body, .container-fluid {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <!--bootstrap-->
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <!-- Script de maps -->
+  <script>
+    //declaración de variables
+    var map;
+    var markers = [];
+    var infowindowActivo = false;
+    var prueba;
+
+    //declacracion del mapa
+    function myMap() {
+      var mapProp= {
+          center:new google.maps.LatLng(4.6486259,-74.113383),
+          zoom:11,
+          disableDefaultUI: true
+      };
+      map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+    }
+
+    //carga de GeoJSON
+    var script = document.createElement('script');
+    script.src = 'http://juansandoval.eshost.com.ar/carga_inicial.php';
+    document.getElementsByTagName('head')[0].appendChild(script);
+
+    //instanciación de localización
+    function localizacion(results) {
+      for (var i = 0; i < results.length; i++) {
+        var latLng = new google.maps.LatLng(results[i].lat,results[i].lng);
+        markers[i] = new google.maps.Marker({
+          position: latLng,
+          map: map
+        });
+        markers[i].infoWindow = new google.maps.InfoWindow({
+          content: "<h6>" + results[i].razonsocial + "</h6><p>Dirección: " + results[i].direccion + "</p><p>Teléfono: " + results[i].telefono + "</p>"
+        });
+        google.maps.event.addListener(markers[i], "click", function(){
+          if (infowindowActivo) {
+            infowindowActivo.close();
+          }
+          infowindowActivo = this.infoWindow;
+          infowindowActivo.open(map, this);
+        });
+      }
+    }
+
+    //instanciación de zonas
+    function zonas(results){
+      var txt = "<option value = 0>Todas las zonas</option>";
+      for (var i = 0; i < results.length; i++) {
+        txt += "<option value = " + results[i].idtubicacion + ">" + results[i].zona + "</option>";
+      }
+      document.getElementById("sel1").innerHTML = txt;
+    }
+
+    //instanciación de especialidades
+    function especialidades(results){
+      var txt = "<option value = 0>Todas las especialidades</option>";
+      for (var i = 0; i < results.length; i++) {
+        txt += "<option value = " + results[i].idtespecialidad + ">" + results[i].especialidad + "</option>";
+      }
+      document.getElementById("sel2").innerHTML = txt;
+    }
+
+    //limpiar mapas
+    function colocar(map) {
+      for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(map);
+      }
+    }
+    function limpiar() {
+      colocar (null);
+      markers = [];
+    }
+
+    //carga de la zona
+    function zonificacion(sel) {
+      var obj, s;
+      num = sel;
+      obj = {"ubicacion":Number(num), "especialidad":Number(document.getElementById("sel2").value)};
+      s = document.createElement("script");
+      s.src = "http://juansandoval.eshost.com.ar/consulta.php?x=" + JSON.stringify(obj);
+      document.body.appendChild(s);
+    }
+
+    function cambio_map(new_map) {
+      markers = [];
+      var latLng = new google.maps.LatLng(new_map.lat, new_map.lng);
+      var mapProp = {
+        center:latLng,
+        zoom:new_map.zoom,
+        disableDefaultUI: true
+      };
+      map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+      for (var i = 0; i < new_map.restaurantes.length; i++) {
+        var res_latlng = new google.maps.LatLng(new_map.restaurantes[i].lat, new_map.restaurantes[i].lng);
+        markers[i] = new google.maps.Marker({
+          position:res_latlng,
+          map:map
+        });
+        markers[i].infoWindow = new google.maps.InfoWindow({
+          content: "<h6>" + new_map.restaurantes[i].razonsocial + "</h6><p>Dirección: " + new_map.restaurantes[i].direccion + "</p><p>Teléfono: " + new_map.restaurantes[i].telefono + "</p>"
+        });
+        google.maps.event.addListener(markers[i], "click", function(){
+          if (infowindowActivo) {
+            infowindowActivo.close();
+          }
+          infowindowActivo = this.infoWindow;
+          infowindowActivo.open(map, this);
+        });
+      }
+    }
+    function filtro(sel) {
+      var obj, s;
+      num = sel;
+      obj = {"ubicacion":Number(document.getElementById("sel1").value), "especialidad":Number(num)};
+      s = document.createElement("script");
+      s.src = "http://juansandoval.eshost.com.ar/consulta2.php?x=" + JSON.stringify(obj);
+      document.body.appendChild(s);
+    }
+    function filtro_esp(new_marker) {
+      limpiar();
+      for (var i = 0; i < new_marker.length; i++) {
+        var latLng = new google.maps.LatLng(new_marker[i].lat, new_marker[i].lng);
+        markers[i] = new google.maps.Marker({
+          position:latLng,
+          map:map
+        });
+        markers[i].infoWindow = new google.maps.InfoWindow({
+          content: "<h6>" + new_marker[i].razonsocial + "</h6><p>Dirección: " + new_marker[i].direccion + "</p><p>Teléfono: " + new_marker[i].telefono + "</p>"
+        });
+        google.maps.event.addListener(markers[i], "click", function(){
+          if (infowindowActivo) {
+            infowindowActivo.close();
+          }
+          infowindowActivo = this.infoWindow;
+          infowindowActivo.open(map, this);
+        });
+      }
+    }
+    function control(valor) {
+      if (valor.total == 0) {
+        if (document.getElementById("sel1").value != 0 && document.getElementById("sel2").value != 0) {
+          $('#myModal').modal({show:true});
+        }
+      }
+      
+    }
+  </script>
+</head>
+<body>
+  <div id="demo"></div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xs-6">
+        <div class="form-group">
+          <label for="sel1">Zona</label>
+          <select id="sel1" class="form-control" onchange="zonificacion(this.value)">
+          </select>
+        </div>
+      </div>
+      <div class="col-xs-6">
+        <div class="form-group">
+          <label for="sel2">Especialidad</label>
+          <select id="sel2" class="form-control" onchange="filtro(this.value)">
+          </select>
+        </div>
+      </div>
+    </div>
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-body">
+          <p>No hay restaurantes con esta especialidad en la zona</p>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+    <!--maps-->
+    <div id="googleMap"></div>
+  </div>
+      
+  <!-- Carga API Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmr7hqb6Thx9pd72C_VShyLmey2d_X638&callback=myMap"></script>
+</body>
+</html>
