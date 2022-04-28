@@ -37,7 +37,7 @@
 
     //carga de GeoJSON
     var script = document.createElement('script');
-    script.src = 'http://juansandoval.eshost.com.ar/carga_inicial.php';
+    script.src = 'http://localhost/proy5s/carga_inicial.php';
     document.getElementsByTagName('head')[0].appendChild(script);
 
     //instanciación de localización
@@ -96,7 +96,7 @@
       num = sel;
       obj = {"ubicacion":Number(num), "especialidad":Number(document.getElementById("sel2").value)};
       s = document.createElement("script");
-      s.src = "http://juansandoval.eshost.com.ar/consulta.php?x=" + JSON.stringify(obj);
+      s.src = "http://localhost/proy5s/consulta.php?x=" + JSON.stringify(obj);
       document.body.appendChild(s);
     }
 
@@ -132,7 +132,7 @@
       num = sel;
       obj = {"ubicacion":Number(document.getElementById("sel1").value), "especialidad":Number(num)};
       s = document.createElement("script");
-      s.src = "http://juansandoval.eshost.com.ar/consulta2.php?x=" + JSON.stringify(obj);
+      s.src = "http://localhost/proy5s/consulta2.php?x=" + JSON.stringify(obj);
       document.body.appendChild(s);
     }
     function filtro_esp(new_marker) {
@@ -201,6 +201,6 @@
   </div>
       
   <!-- Carga API Google Maps -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmr7hqb6Thx9pd72C_VShyLmey2d_X638&callback=myMap"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1P3PA33vjtEmpU3rryRjiKH04nmdC5_E&callback=myMap"></script>
 </body>
 </html>
